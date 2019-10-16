@@ -306,7 +306,7 @@ class mirvpgl {
                                         if (2 != version)
                                             throw "Error: version mismatch";
                                         self.ws.send(new Uint8Array(Buffer.from('transBegin\0', 'utf8')), { binary: true });
-                                        //self.ws.send(new Uint8Array(Buffer.from('exec\0mirv_pgl events enrich clientTime 1\0', 'utf8')), { binary: true });
+                                        self.ws.send(new Uint8Array(Buffer.from('exec\0mirv_pgl events enrich clientTime 1\0', 'utf8')), { binary: true });
                                         for (var eventName in enrichments) {
                                             for (var keyName in enrichments[eventName]) {
                                                 var arrEnrich = enrichments[eventName][keyName].enrichments;
