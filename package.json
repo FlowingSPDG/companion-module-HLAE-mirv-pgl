@@ -1,0 +1,18 @@
+{
+	"name": "hlae-mirv-pgl",
+	"version": "0.0.1",
+	"api_version": "1.0.0",
+	"keywords": [
+		"advancedfx"
+	],
+	"manufacturer": "advancedfx",
+	"product": "HLAE",
+	"shortname": "HLAE",
+	"description": "Module to control CSGO Client via HLAE mirv_pgl",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"author": "Shugo Kawamura",
+	"license": "MIT"
+}
