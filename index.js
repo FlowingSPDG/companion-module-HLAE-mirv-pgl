@@ -52,15 +52,17 @@ instance.prototype.init_pgl = function () {
 		self.status(0, 'Waiting for connection... :' + self.config.port + self.config.path);
 
 		self.pgl.emitter.on('cam', (data) => {
-			self.states['cam_time'] = data['time']
-			self.states['cam_fov'] = data['fov']
-			self.states['cam_xPosition'] = data['xPosition']
-			self.states['cam_yPosition'] = data['yPosition']
-			self.states['cam_zPosition'] = data['zPosition']
-			self.states['cam_xRotation'] = data['xRotation']
-			self.states['cam_yRotation'] = data['yRotation']
-			self.states['cam_zRotation'] = data['zRotation']
-			self.refresh_variables(data)
+			self.setVariable('cam_time', data['time']);
+			self.setVariable('cam_fov', data['fov']);
+			self.setVariable('cam_xPosition', data['xPosition']);
+			self.setVariable('cam_yPosition', data['yPosition']);
+			self.setVariable('cam_zPosition', data['zPosition']);
+			self.setVariable('cam_xRotation', data['xRotation']);
+			self.setVariable('cam_yRotation', data['yRotation']);
+			self.setVariable('cam_zRotation', data['zRotation']);
+		})
+		self.pgl.emitter.on('map', (map) => {
+			self.setVariable('map', map);
 		})
 		self.pgl.wss.on('connection', function () {
 			self.debug("Client connected");
@@ -78,26 +80,11 @@ instance.prototype.init_pgl = function () {
 	}
 };
 
-instance.prototype.refresh_variables = function (data) {
-	var self = this;
-
-	for (var s in data) {
-		self.states[s] = data[s];
-	}
-	self.setVariable('cam_time', data['time']);
-	self.setVariable('cam_fov', data['fov']);
-	self.setVariable('cam_xPosition', data['xPosition']);
-	self.setVariable('cam_yPosition', data['yPosition']);
-	self.setVariable('cam_zPosition', data['zPosition']);
-	self.setVariable('cam_xRotation', data['xRotation']);
-	self.setVariable('cam_yRotation', data['yRotation']);
-	self.setVariable('cam_zRotation', data['zRotation']);
-}
-
 instance.prototype.init_variables = function () {
 	var self = this;
 
 	var variables = [];
+	variables.push({ name: 'map', label: 'Map name' });
 	variables.push({ name: 'cam_time', label: 'Camera time' });
 	variables.push({ name: 'cam_fov', label: 'Camera fov' });
 	variables.push({ name: 'cam_xPosition', label: 'Camera X-POSITION' });
