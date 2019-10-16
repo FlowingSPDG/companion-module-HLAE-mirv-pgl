@@ -20,7 +20,7 @@ instance.prototype.updateConfig = function(config) {
 	self.init_presets();
 
 	self.config = config;
-	self.init_tcp();
+	self.init_pgl();
 	self.actions();
 
 };
