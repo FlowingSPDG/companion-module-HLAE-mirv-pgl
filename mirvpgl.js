@@ -269,7 +269,6 @@ class mirvpgl {
         //console.log(path);
         var self = this;
         this.emitter = new events_1.EventEmitter();
-        this.ws = null;
         this.wsConsole = new Console();
         this.wsConsole.print(`Listening on port ${port}, path ${path} ...`);
         this.server = http.createServer();

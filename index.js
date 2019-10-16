@@ -38,31 +38,27 @@ instance.prototype.init_pgl = function() {
 	var self = this;
 
 	if (self.pgl !== undefined) {
-		self.pgl.emitter.emit("close")
 		self.pgl.wss.close();
 		self.pgl.server.close()
 		delete self.pgl;
 	}
 
-	if (self.config.port && self.config.path) {
+	if (self.pgl === undefined && self.config.port && self.config.path) {
 		const mirvpgl = require("./mirvpgl").default;
 		self.pgl = new mirvpgl(self.config.port, self.config.path); 
-		self.status(0,'Waiting for connection'); // status ok!
+		self.status(0,'Waiting for connection... :' + self.config.port + self.config.path);
 
-		self.pgl.emitter.on('error',function (err) {
-			self.debug("Network error", err);
-			self.status(self.STATE_ERROR, err);
-			self.log('error',"Network error: " + err);
+		self.pgl.wss.on('connection', function () {
+			self.debug("Client connected");
+			self.status(0,'Client connected!'); // status ok!
 		})
-
-		self.pgl.emitter.on('close',function () {
+		self.pgl.wss.on('close', function () {
 			self.debug("Connection closed");
-			self.status(0,'Waiting for connection'); // status ok!
+			self.status(0,'Client disconnected!'); // status ok!
 		})
-
-		self.pgl.emitter.on('hello',function () {
-			self.debug("Connected");
-			self.status(2,'Client connected'); // status ok!
+		self.pgl.wss.on('error', function () {
+			self.log("Client error!");
+			self.status(2,'Client error!!'); // status ok!
 		})
 		
 	}
@@ -122,13 +118,12 @@ instance.prototype.destroy = function() {
 	var self = this;
 
 	if (self.pgl !== undefined) {
-		self.pgl.emitter.emit("close")
 		self.pgl.wss.close();
 		self.pgl.server.close()
 		delete self.pgl;
 	}
 
-	debug("destroy", self.id);
+	self.debug("destroy", self.id);
 };
 
 
@@ -160,7 +155,7 @@ instance.prototype.actions = function(system) {
 				break;
 	};
 	if (cmd !== undefined) {
-		debug('sending ',cmd);
+		self.log('sending ',cmd);
 		if (self.pgl !== undefined) {
 			self.pgl.sendcommand(cmd);
 		} else {
