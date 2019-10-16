@@ -64,6 +64,15 @@ instance.prototype.init_pgl = function () {
 		self.pgl.emitter.on('map', (map) => {
 			self.setVariable('map', map);
 		})
+		self.pgl.emitter.on('gameEvent', (data) => {
+			var event = JSON.parse(data)
+			console.log(event.name)
+			self.setVariable('LastGameEventName', event.name);
+			if (event.name == "player_death") {
+				self.setVariable('LastKiller', event.keys.attacker.xuid);
+				self.states.lastkiller = event.keys.attacker.xuid
+			}
+		})
 		self.pgl.wss.on('connection', function () {
 			self.debug("Client connected");
 			self.status(0, 'Client connected!'); // status ok!
@@ -84,6 +93,8 @@ instance.prototype.init_variables = function () {
 	var self = this;
 
 	var variables = [];
+	variables.push({ name: 'LastGameEventName', label: 'Last Game event name' });
+	variables.push({ name: 'LastKiller', label: 'Latest player who get frag' });
 	variables.push({ name: 'map', label: 'Map name' });
 	variables.push({ name: 'cam_time', label: 'Camera time' });
 	variables.push({ name: 'cam_fov', label: 'Camera fov' });
@@ -120,6 +131,7 @@ instance.prototype.config_fields = function () {
 };
 
 instance.prototype.CHOICES_COMMANDS = [
+	{ id: 'spec_latest', size: '14', label: 'Spec player who get latest kill' },
 	{ id: 'command', size: '14', label: 'Custom Command' },
 ];
 
@@ -174,6 +186,16 @@ instance.prototype.actions = function (system) {
 					default: 'echo Hello from companion'
 				}
 			]
+		},
+		'spec_latest': {
+			label: 'Spec player who get latest kill',
+			options: [
+				{
+					type: 'none',
+					label: '',
+					id: 'spec_latest',
+				}
+			]
 		}
 	});
 };
@@ -186,6 +208,9 @@ instance.prototype.action = function (action) {
 		case 'command':
 			cmd = opt.command;
 			break;
+		case 'spec_latest':
+			cmd = `spec_player_by_accountid ${self.states.lastkiller};spec_mode 1`;
+			break; //spec_latest
 	};
 	if (cmd !== undefined) {
 		self.log('info ' + cmd);
