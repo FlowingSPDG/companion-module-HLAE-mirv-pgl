@@ -31,33 +31,40 @@ instance.prototype.init = function() {
 	debug = self.debug;
 	log = self.log;
 	self.init_presets();
-
-	self.status(1,'Waiting for connection'); // status ok!
-
 	self.init_pgl();
 };
 
 instance.prototype.init_pgl = function() {
 	var self = this;
 
-	if (self.socket !== undefined) {
-		self.pgl.emit.emitter("close")
+	if (self.pgl !== undefined) {
+		self.pgl.emitter.emit("close")
+		self.pgl.wss.close();
+		self.pgl.server.close()
 		delete self.pgl;
 	}
 
 	if (self.config.port && self.config.path) {
-		const mirvpgl = require("./mirvpgl");
-		self.pgl = new mirvpgl(self.config.port,self.config.path); 
+		const mirvpgl = require("./mirvpgl").default;
+		self.pgl = new mirvpgl(self.config.port, self.config.path); 
+		self.status(0,'Waiting for connection'); // status ok!
 
 		self.pgl.emitter.on('error',function (err) {
-			debug("Network error", err);
+			self.debug("Network error", err);
 			self.status(self.STATE_ERROR, err);
 			self.log('error',"Network error: " + err);
 		})
 
 		self.pgl.emitter.on('close',function () {
-			debug("Connection closed");
+			self.debug("Connection closed");
+			self.status(0,'Waiting for connection'); // status ok!
 		})
+
+		self.pgl.emitter.on('hello',function () {
+			self.debug("Connected");
+			self.status(2,'Client connected'); // status ok!
+		})
+		
 	}
 };
 
@@ -76,7 +83,7 @@ instance.prototype.config_fields = function () {
 		{
 			type: 'textinput',
 			id: 'path',
-			label: 'Host ws path',
+			label: 'Host ws path (Default: /mirv)',
 			width: 5,
 			default: '/mirv',
 		}
@@ -114,8 +121,11 @@ instance.prototype.init_presets = function () {
 instance.prototype.destroy = function() {
 	var self = this;
 
-	if (self.socket !== undefined) {
-		self.pgl.emit.emitter("close")
+	if (self.pgl !== undefined) {
+		self.pgl.emitter.emit("close")
+		self.pgl.wss.close();
+		self.pgl.server.close()
+		delete self.pgl;
 	}
 
 	debug("destroy", self.id);
@@ -146,18 +156,16 @@ instance.prototype.actions = function(system) {
 		var cmd = ''
 		switch (action.action) {
 			case 'command':
-				cmd = 'FUNCTION ' + opt.command;
+				cmd = opt.command;
 				break;
 	};
 	if (cmd !== undefined) {
-
 		debug('sending ',cmd);
-		if (self.socket !== undefined) {
-			self.socket.sendcommand(cmd);
+		if (self.pgl !== undefined) {
+			self.pgl.sendcommand(cmd);
 		} else {
 			debug('Socket not connected :(');
 		}
-
 	}
 
 
