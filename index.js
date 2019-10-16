@@ -66,7 +66,7 @@ instance.prototype.init_pgl = function () {
 		})
 		self.pgl.emitter.on('gameEvent', (data) => {
 			var event = JSON.parse(data)
-			console.log(event.name)
+			//console.log(event.name)
 			self.setVariable('LastGameEventName', event.name);
 			if (event.name == "player_death") {
 				self.setVariable('LastKiller', event.keys.attacker.xuid);
